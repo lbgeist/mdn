@@ -6,6 +6,9 @@ var ctx = canvas.getContext('2d');
 var width = canvas.width = window.innerWidth;
 var height = canvas.height = window.innerHeight;
 
+var para = document.querySelector('p');
+var count = 0;
+
 // function to generate random number
 
 function random(min,max) {
@@ -32,7 +35,7 @@ function Ball(x, y, velX, velY, exists, color, size) {
 
 Ball.prototype.constructor = Ball;
 
-function EvilCircle(x, y, velX, velY, exists) {
+function EvilCircle(x, y, exists) {
   Shape.call(this, x, y, 20, 20, exists);
 
   this.color = 'white';
@@ -99,6 +102,8 @@ EvilCircle.prototype.collisionDetect = function() {
 
       if (distance < this.size + balls[j].size) {
         balls[j].exists = false;
+        count--;
+        para.textContent = 'Ball Count: ' + count;
       }
     }
   }
@@ -145,7 +150,7 @@ Ball.prototype.collisionDetect = function() {
       var dy = this.y - balls[j].y;
       var distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance < this.size + balls[j].size) {
+      if (distance < this.size + balls[j].size && balls[j].exists) {
         balls[j].color = this.color = 'rgb(' + random(0,255) + ',' + random(0,255) + ',' + random(0,255) +')';
       }
     }
@@ -169,7 +174,13 @@ while(balls.length < 25) {
     size
   );
   balls.push(ball);
+  count ++;
+  para.textContent = 'Ball count: ' + count;
 }
+
+// define EvilCircle
+var evil = new EvilCircle(random(0,width), random(0,height), true);
+evil.setControls();
 
 // define loop that keeps drawing the scene constantly
 
@@ -178,10 +189,16 @@ function loop() {
   ctx.fillRect(0,0,width,height);
 
   for(var i = 0; i < balls.length; i++) {
-    balls[i].draw();
-    balls[i].update();
-    balls[i].collisionDetect();
+    if (balls[i].exists) {
+      balls[i].draw();
+      balls[i].update();
+      balls[i].collisionDetect();
+    }
   }
+
+  evil.draw();
+  evil.checkBounds();
+  evil.collisionDetect();
 
   requestAnimationFrame(loop);
 }
